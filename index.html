@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fútbol Debate</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --bg-soft:#111820;
+      --panel:#141d26;
+      --panel-2:#19252f;
+      --border:#263340;
+      --text:#f5f7fa;
+      --muted:#aab8c5;
+      --muted-2:#7d8a98;
+      --green:#39d98a;
+      --green-deep:#1ca267;
+      --dark-green:#06120b;
+      --shadow:0 14px 30px rgba(0,0,0,.25);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+
+    a{color:inherit}
+    button,input,textarea{font:inherit}
+
+    header{
+      background:rgba(16,23,32,.95);
+      border-bottom:1px solid var(--border);
+      position:sticky; top:0; z-index:20; backdrop-filter:blur(8px);
+    }
+
+    .nav{
+      max-width:1100px; margin:0 auto; padding:16px 20px;
+      display:flex; align-items:center; justify-content:space-between; gap:20px;
+    }
+
+    .logo{
+      font-size:26px; font-weight:900; letter-spacing:-0.03em;
+    }
+    .logo span{color:var(--green)}
+
+    nav{
+      display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    }
+    nav a{
+      color:var(--muted);
+      text-decoration:none;
+      cursor:pointer;
+      transition:.2s ease;
+      font-weight:600;
+    }
+    nav a:hover{
+      color:var(--text);
+    }
+
+    .hero{
+      max-width:1100px; margin:0 auto; padding:60px 20px 30px;
+    }
+    .hero h1{
+      font-size:clamp(38px,7vw,68px);
+      line-height:.95;
+      letter-spacing:-0.04em;
+      max-width:700px;
+    }
+    .hero h1 span{color:var(--green)}
+    .hero p{
+      color:var(--muted);
+      font-size:18px; margin:18px 0 25px;
+      max-width:650px;
+    }
+
+    .btn{
+      border:0; border-radius:12px;
+      background:var(--green);
+      color:var(--dark-green);
+      font-weight:800; padding:12px 18px;
+      cursor:pointer; transition:.2s ease;
+      box-shadow:0 8px 18px rgba(57,217,138,.25);
+    }
+    .btn:hover{
+      filter:brightness(1.08);
+      transform:translateY(-1px);
+    }
+
+    .layout{
+      max-width:1100px; margin:0 auto; padding:20px;
+      display:grid; grid-template-columns:minmax(0,1fr) 290px; gap:22px;
+    }
+
+    .tabs{
+      display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;
+    }
+
+    .tab{
+      background:#141c25;
+      color:var(--muted);
+      border:1px solid var(--border);
+      padding:9px 13px; border-radius:999px;
+      cursor:pointer; font-weight:700; transition:.2s ease;
+    }
+    .tab.active, .tab:hover{
+      background:var(--green);
+      color:var(--dark-green);
+      border-color:var(--green);
+    }
+
+    .card{
+      background:var(--bg-soft);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:20px;
+      margin-bottom:14px;
+      box-shadow:var(--shadow);
+    }
+
+    .card h2{
+      font-size:20px;
+      margin:8px 0 10px;
+      line-height:1.25;
+    }
+
+    .meta{
+      color:var(--muted-2);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .tags{
+      display:flex; gap:7px; flex-wrap:wrap; margin:12px 0;
+    }
+
+    .tag{
+      font-size:12px;
+      background:var(--panel-2);
+      color:#b0bbca;
+      padding:5px 8px;
+      border-radius:6px;
+      border:1px solid #2a3945;
+    }
+
+    .actions{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:15px; margin-top:16px; flex-wrap:wrap;
+    }
+
+    .vote{
+      display:flex; align-items:center; gap:8px;
+    }
+    .vote button{
+      background:var(--panel-2);
+      color:var(--text);
+      border:1px solid #2b3844;
+      border-radius:9px;
+      padding:7px 10px;
+      cursor:pointer; transition:.2s ease;
+      font-size:16px;
+    }
+    .vote button:hover{
+      background:#263744;
+      transform:translateY(-1px);
+    }
+
+    .vote strong{
+      min-width:28px;
+      text-align:center;
+      display:inline-block;
+      font-size:18px;
+    }
+
+    .side h3{margin-bottom:12px}
+    .side .card{padding:16px}
+    .side li{
+      list-style:none;
+      padding:11px 0;
+      border-bottom:1px solid var(--border);
+      color:#d2dbe3;
+      cursor:pointer; transition:.2s ease;
+    }
+    .side li:last-child{border:0}
+    .side li:hover{color:var(--green)}
+
+    form{
+      display:none;
+      margin-bottom:18px;
+    }
+    .form input, .form textarea{
+      width:100%;
+      background:#0c1218;
+      color:var(--text);
+      border:1px solid #2a3743;
+      border-radius:10px;
+      padding:12px 14px;
+      margin:7px 0 12px;
+      outline:none;
+    }
+    .form input:focus, .form textarea:focus{
+      border-color:var(--green);
+      box-shadow:0 0 0 3px rgba(57,217,138,.12);
+    }
+    .form textarea{
+      min-height:110px;
+      resize:vertical;
+    }
+
+    .empty{
+      color:#9aa8b5;
+      padding:28px;
+      text-align:center;
+      border:1px dashed var(--border);
+      border-radius:16px;
+      background:rgba(255,255,255,.01);
+    }
+
+    footer{
+      text-align:center;
+      color:#687582;
+      padding:38px 20px 50px;
+    }
+
+    @media(max-width:800px){
+      .layout{grid-template-columns:1fr}
+      .side{display:none}
+      nav a{margin-left:0}
+      .nav{padding:13px 15px}
+      .hero{padding-top:38px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="logo">⚽ Fútbol<span>Debate</span></div>
+      <nav>
+        <a onclick="scrollToDebates()">Debates</a>
+        <a onclick="mostrarFormulario()">Crear debate</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Donde el fútbol<br><span>se debate.</span></h1>
+    <p>Opiná, votá y defendé tu punto de vista. Los mejores debates del fútbol, en un solo lugar.</p>
+    <button class="btn" onclick="mostrarFormulario()">+ Crear un debate</button>
+  </section>
+
+  <main class="layout" id="debates">
+    <section>
+      <div class="tabs">
+        <button class="tab active" onclick="filtrar('Todos', this)">Todos</button>
+        <button class="tab" onclick="filtrar('Messi', this)">Messi</button>
+        <button class="tab" onclick="filtrar('Cristiano', this)">Cristiano</button>
+        <button class="tab" onclick="filtrar('Clubes', this)">Clubes</button>
+        <button class="tab" onclick="filtrar('Selecciones', this)">Selecciones</button>
+      </div>
+
+      <form id="form" class="card form" onsubmit="crearDebate(event)">
+        <h2>Crear nuevo debate</h2>
+        <input id="titulo" required placeholder="Ej: ¿Quién es el mejor 9 de la historia?">
+        <textarea id="descripcion" required placeholder="Contá tu opinión y abrí la discusión..."></textarea>
+        <input id="categoria" required placeholder="Categoría: Clubes, Messi, Selecciones...">
+        <button class="btn" type="submit">Publicar debate</button>
+      </form>
+
+      <div id="lista"></div>
+    </section>
+
+    <aside class="side">
+      <div class="card">
+        <h3>🔥 Tendencias</h3>
+        <ul>
+          <li onclick="filtrar('Messi')">Messi vs Cristiano</li>
+          <li onclick="filtrar('Clubes')">Mejor club del mundo</li>
+          <li onclick="filtrar('Selecciones')">¿Quién gana el Mundial?</li>
+          <li onclick="mostrarFormulario()">El mejor 9 de la historia</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>📊 Comunidad</h3>
+        <p class="meta">Debates activos</p>
+        <h2 id="total">0</h2>
+        <p class="meta">Opiniones y votos</p>
+        <h2>1.2K+</h2>
+      </div>
+    </aside>
+  </main>
+
+  <footer>⚽ FútbolDebate — Tu opinión también juega.</footer>
+
+  <script>
+    const STORAGE_KEY = "futbolDebateData";
+
+    let debates = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
+      {
+        id: crypto.randomUUID(),
+        titulo: "¿Messi o Cristiano: quién tuvo la mejor carrera?",
+        desc: "Dos leyendas. Títulos, goles, selección y Champions. ¿Quién queda arriba?",
+        cat: "Messi",
+        votes: 342,
+        comments: 87
+      },
+      {
+        id: crypto.randomUUID(),
+        titulo: "¿Cuál es el mejor club del mundo actualmente?",
+        desc: "Compará planteles, títulos recientes, historia y nivel actual.",
+        cat: "Clubes",
+        votes: 218,
+        comments: 54
+      },
+      {
+        id: crypto.randomUUID(),
+        titulo: "¿Qué selección llega mejor al próximo Mundial?",
+        desc: "Planteles, estrellas y rendimiento: ¿quién es tu favorita?",
+        cat: "Selecciones",
+        votes: 176,
+        comments: 41
+      }
+    ];
+
+    let filtro = "Todos";
+
+    function saveDebates(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(debates));
+    }
+
+    function render(){
+      const lista = document.getElementById("lista");
+      const visible = filtro === "Todos"
+        ? debates
+        : debates.filter(d => d.cat === filtro);
+
+      lista.innerHTML = visible.length
+        ? visible.map(d => `
+            <article class="card">
+              <div class="meta">🔥 Debate popular · ${esc(d.cat)}</div>
+              <h2>${esc(d.titulo)}</h2>
+              <p class="meta">${esc(d.desc)}</p>
+              <div class="tags">
+                <span class="tag">⚽ Fútbol</span>
+                <span class="tag">💬 ${d.comments} comentarios</span>
+              </div>
+              <div class="actions">
+                <div class="vote">
+                  <button onclick="votar('${d.id}', 1)" aria-label="Votar positivo">👍</button>
+                  <strong>${d.votes}</strong>
+                  <button onclick="votar('${d.id}', -1)" aria-label="Votar negativo">👎</button>
+                </div>
+                <span class="meta">💬 ${d.comments}</span>
+              </div>
+            </article>
+          `).join("")
+        : '<div class="card empty">No hay debates en esta categoría todavía.</div>';
+
+      document.getElementById("total").textContent = debates.length;
+    }
+
+    function filtrar(cat, el){
+      filtro = cat || "Todos";
+      document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+      if (el) el.classList.add("active");
+      render();
+      scrollToDebates();
+    }
+
+    function votar(id, delta){
+      const debate = debates.find(d => d.id === id);
+      if (!debate) return;
+      debate.votes += delta;
+      saveDebates();
+      render();
+    }
+
+    function mostrarFormulario(){
+      const form = document.getElementById("form");
+      form.style.display = "block";
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("titulo").focus();
+    }
+
+    function crearDebate(e){
+      e.preventDefault();
+
+      const titulo = document.getElementById("titulo");
+      const descripcion = document.getElementById("descripcion");
+      const categoria = document.getElementById("categoria");
+
+      const nuevoTitulo = titulo.value.trim();
+      const nuevaDescripcion = descripcion.value.trim();
+      const nuevaCategoria = categoria.value.trim() || "General";
+
+      if (!nuevoTitulo || !nuevaDescripcion) return;
+
+      debates.unshift({
+        id: crypto.randomUUID(),
+        titulo: nuevoTitulo,
+        desc: nuevaDescripcion,
+        cat: nuevaCategoria,
+        votes: 0,
+        comments: 0
+      });
+
+      saveDebates();
+      e.target.reset();
+      e.target.style.display = "none";
+
+      filtro = "Todos";
+      render();
+
+      document.querySelectorAll(".tab").forEach((x, i) => {
+        x.classList.toggle("active", i === 0);
+      });
+
+      document.getElementById("debates").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function scrollToDebates(){
+      document.getElementById("debates").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function esc(value){
+      return String(value).replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[c]));
+    }
+
+    render();
+  </script>
+</body>
+</html>
