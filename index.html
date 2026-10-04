@@ -192,7 +192,8 @@
       display:none;
       margin-bottom:18px;
     }
-    .form input, .form textarea{
+    .form input, .form textarea,
+    .comment-form input, .comment-form textarea{
       width:100%;
       background:#0c1218;
       color:var(--text);
@@ -202,11 +203,12 @@
       margin:7px 0 12px;
       outline:none;
     }
-    .form input:focus, .form textarea:focus{
+    .form input:focus, .form textarea:focus,
+    .comment-form input:focus, .comment-form textarea:focus{
       border-color:var(--green);
       box-shadow:0 0 0 3px rgba(57,217,138,.12);
     }
-    .form textarea{
+    .form textarea, .comment-form textarea{
       min-height:110px;
       resize:vertical;
     }
@@ -218,6 +220,59 @@
       border:1px dashed var(--border);
       border-radius:16px;
       background:rgba(255,255,255,.01);
+    }
+
+    .comments-block{
+      margin-top:18px;
+      padding-top:16px;
+      border-top:1px solid var(--border);
+    }
+
+    .comments-block h4{
+      margin-bottom:10px;
+      font-size:15px;
+      color:var(--text);
+    }
+
+    .comment-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .comment-item{
+      background:rgba(255,255,255,.02);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px 12px;
+    }
+
+    .comment-meta{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      color:var(--muted-2);
+      font-size:12px;
+      margin-bottom:5px;
+    }
+
+    .comment-text{
+      color:var(--text);
+      font-size:14px;
+      line-height:1.6;
+      word-break:break-word;
+    }
+
+    .comment-form {
+      display:block;
+      margin-top:8px;
+    }
+
+    .comment-form .btn{
+      width:auto;
+      margin-top:4px;
     }
 
     footer{
@@ -306,7 +361,10 @@
         desc: "Dos leyendas. Títulos, goles, selección y Champions. ¿Quién queda arriba?",
         cat: "Messi",
         votes: 342,
-        comments: 87
+        comentarios: [
+          { id: crypto.randomUUID(), author: "Nico", text: "Messi fue decisivo en todas las competiciones y cambió el juego.", createdAt: new Date().toISOString() },
+          { id: crypto.randomUUID(), author: "Lucho", text: "Cristiano tuvo una carrera más larga y brutal en Champions.", createdAt: new Date().toISOString() }
+        ]
       },
       {
         id: crypto.randomUUID(),
@@ -314,7 +372,9 @@
         desc: "Compará planteles, títulos recientes, historia y nivel actual.",
         cat: "Clubes",
         votes: 218,
-        comments: 54
+        comentarios: [
+          { id: crypto.randomUUID(), author: "Mati", text: "Real Madrid siempre tiene ventaja por experiencia y nombre.", createdAt: new Date().toISOString() }
+        ]
       },
       {
         id: crypto.randomUUID(),
@@ -322,7 +382,9 @@
         desc: "Planteles, estrellas y rendimiento: ¿quién es tu favorita?",
         cat: "Selecciones",
         votes: 176,
-        comments: 41
+        comentarios: [
+          { id: crypto.randomUUID(), author: "Tomi", text: "Argentina tiene equilibrio total y mucha experiencia clave.", createdAt: new Date().toISOString() }
+        ]
       }
     ];
 
@@ -339,25 +401,53 @@
         : debates.filter(d => d.cat === filtro);
 
       lista.innerHTML = visible.length
-        ? visible.map(d => `
-            <article class="card">
-              <div class="meta">🔥 Debate popular · ${esc(d.cat)}</div>
-              <h2>${esc(d.titulo)}</h2>
-              <p class="meta">${esc(d.desc)}</p>
-              <div class="tags">
-                <span class="tag">⚽ Fútbol</span>
-                <span class="tag">💬 ${d.comments} comentarios</span>
-              </div>
-              <div class="actions">
-                <div class="vote">
-                  <button onclick="votar('${d.id}', 1)" aria-label="Votar positivo">👍</button>
-                  <strong>${d.votes}</strong>
-                  <button onclick="votar('${d.id}', -1)" aria-label="Votar negativo">👎</button>
+        ? visible.map(d => {
+            const comentarios = Array.isArray(d.comentarios) ? d.comentarios : [];
+            const totalComentarios = comentarios.length;
+
+            return `
+              <article class="card">
+                <div class="meta">🔥 Debate popular · ${esc(d.cat)}</div>
+                <h2>${esc(d.titulo)}</h2>
+                <p class="meta">${esc(d.desc)}</p>
+                <div class="tags">
+                  <span class="tag">⚽ Fútbol</span>
+                  <span class="tag">💬 ${totalComentarios} comentarios</span>
                 </div>
-                <span class="meta">💬 ${d.comments}</span>
-              </div>
-            </article>
-          `).join("")
+                <div class="actions">
+                  <div class="vote">
+                    <button onclick="votar('${d.id}', 1)" aria-label="Votar positivo">👍</button>
+                    <strong>${d.votes}</strong>
+                    <button onclick="votar('${d.id}', -1)" aria-label="Votar negativo">👎</button>
+                  </div>
+                  <span class="meta">💬 ${totalComentarios}</span>
+                </div>
+
+                <div class="comments-block">
+                  <h4>Comentarios</h4>
+                  <div class="comment-list">
+                    ${comentarios.length
+                      ? comentarios.slice(0, 3).map(c => `
+                          <div class="comment-item">
+                            <div class="comment-meta">
+                              <strong>${esc(c.author || "Anónimo")}</strong>
+                              <span>${new Date(c.createdAt).toLocaleDateString('es-AR')}</span>
+                            </div>
+                            <p class="comment-text">${esc(c.text)}</p>
+                          </div>
+                        `).join("")
+                      : '<div class="comment-item"><p class="comment-text">Sé el primero en comentar.</p></div>'}
+                  </div>
+
+                  <form class="comment-form" onsubmit="agregarComentario(event, '${d.id}')">
+                    <input name="autor" type="text" maxlength="25" placeholder="Tu nombre (opcional)">
+                    <textarea name="texto" required placeholder="Escribí tu opinión..."></textarea>
+                    <button class="btn" type="submit">Comentar</button>
+                  </form>
+                </div>
+              </article>
+            `;
+          }).join("")
         : '<div class="card empty">No hay debates en esta categoría todavía.</div>';
 
       document.getElementById("total").textContent = debates.length;
@@ -375,6 +465,35 @@
       const debate = debates.find(d => d.id === id);
       if (!debate) return;
       debate.votes += delta;
+      saveDebates();
+      render();
+    }
+
+    function agregarComentario(event, debateId){
+      event.preventDefault();
+      const form = event.target;
+      const autorInput = form.querySelector('input[name="autor"]');
+      const textoInput = form.querySelector('textarea[name="texto"]');
+
+      const autor = (autorInput.value || "Anónimo").trim();
+      const texto = textoInput.value.trim();
+
+      if (!texto) return;
+
+      const debate = debates.find(d => d.id === debateId);
+      if (!debate) return;
+
+      if (!Array.isArray(debate.comentarios)) {
+        debate.comentarios = [];
+      }
+
+      debate.comentarios.unshift({
+        id: crypto.randomUUID(),
+        author: autor,
+        text: texto,
+        createdAt: new Date().toISOString()
+      });
+
       saveDebates();
       render();
     }
@@ -405,7 +524,7 @@
         desc: nuevaDescripcion,
         cat: nuevaCategoria,
         votes: 0,
-        comments: 0
+        comentarios: []
       });
 
       saveDebates();
