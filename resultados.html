@@ -536,7 +536,7 @@
   <section class="hero">
     <div class="container">
       <h1>Resultados en <span>vivo</span></h1>
-      <p>Seguí todos los partidos, goles y estadísticas del fútbol mundial</p>
+      <p>Seguí los partidos actuales y consultá el resultado final de los que ya terminaron</p>
     </div>
   </section>
 
@@ -563,10 +563,10 @@
         </div>
 
         <div class="status-filter">
-          <button class="status-btn active" onclick="filtrarPorEstado('Todos')">Todos</button>
-          <button class="status-btn" onclick="filtrarPorEstado('En vivo')">En vivo</button>
-          <button class="status-btn" onclick="filtrarPorEstado('Terminados')">Terminados</button>
-          <button class="status-btn" onclick="filtrarPorEstado('Próximos')">Próximos</button>
+          <button class="status-btn active" data-status="Todos" onclick="filtrarPorEstado('Todos', this)">Todos</button>
+          <button class="status-btn" data-status="En vivo" onclick="filtrarPorEstado('En vivo', this)">En vivo</button>
+          <button class="status-btn" data-status="Terminado" onclick="filtrarPorEstado('Terminado', this)">Terminados</button>
+          <button class="status-btn" data-status="Próximo" onclick="filtrarPorEstado('Próximo', this)">Próximos</button>
         </div>
       </div>
 
@@ -623,78 +623,78 @@
   <script>
     const STORAGE_KEY = "futbolMatchesDB";
 
-    // Datos simulados de partidos
     const mockMatches = [
       {
         id: 1,
-        local: "River Plate",
-        visitante: "Boca Juniors",
+        local: "Inter Miami",
+        visitante: "Toronto FC",
         golesLocal: 2,
         golesVisitante: 1,
-        liga: "Liga 1",
-        estado: "Terminado",
-        fecha: new Date(Date.now() - 3600000),
-        minuto: 90,
-        estadio: "Monumental",
-        asistencia: 70000,
+        liga: "MLS",
+        estado: "En vivo",
+        fecha: new Date(),
+        minuto: 73,
+        estadio: "Chase Stadium",
+        asistencia: 18000,
         goles: [
-          { tiempo: "23'", jugador: "Díaz", equipo: "local" },
-          { tiempo: "41'", jugador: "Cavani", equipo: "local" },
-          { tiempo: "67'", jugador: "Tevez", equipo: "visitante" }
+          { tiempo: "22'", jugador: "Messi", equipo: "local" },
+          { tiempo: "53'", jugador: "Suárez", equipo: "local" },
+          { tiempo: "68'", jugador: "Insigne", equipo: "visitante" }
         ]
       },
       {
         id: 2,
         local: "Manchester City",
         visitante: "Liverpool",
-        golesLocal: 3,
+        golesLocal: 2,
         golesVisitante: 2,
         liga: "Premier",
         estado: "En vivo",
         fecha: new Date(),
-        minuto: 67,
+        minuto: 84,
         estadio: "Etihad Stadium",
         asistencia: 52000,
         goles: [
           { tiempo: "12'", jugador: "Haaland", equipo: "local" },
           { tiempo: "28'", jugador: "Salah", equipo: "visitante" },
-          { tiempo: "45'", jugador: "Foden", equipo: "local" },
-          { tiempo: "54'", jugador: "Núñez", equipo: "visitante" },
-          { tiempo: "62'", jugador: "Grealish", equipo: "local" }
+          { tiempo: "64'", jugador: "Foden", equipo: "local" },
+          { tiempo: "71'", jugador: "Núñez", equipo: "visitante" }
         ]
       },
       {
         id: 3,
-        local: "Real Madrid",
-        visitante: "Barcelona",
-        golesLocal: 0,
+        local: "Boca Juniors",
+        visitante: "River Plate",
+        golesLocal: 1,
         golesVisitante: 0,
-        liga: "LaLiga",
-        estado: "En vivo",
-        fecha: new Date(),
-        minuto: 34,
-        estadio: "Bernabéu",
-        asistencia: 81000,
-        goles: []
+        liga: "Liga 1",
+        estado: "Terminado",
+        fecha: new Date(Date.now() - 86400000),
+        minuto: 90,
+        estadio: "La Bombonera",
+        asistencia: 54000,
+        goles: [
+          { tiempo: "37'", jugador: "Advíncula", equipo: "local" }
+        ]
       },
       {
         id: 4,
-        local: "Bayern Munich",
-        visitante: "Borussia Dortmund",
-        golesLocal: 4,
-        golesVisitante: 1,
-        liga: "Bundesliga",
+        local: "Real Madrid",
+        visitante: "Barcelona",
+        golesLocal: 3,
+        golesVisitante: 2,
+        liga: "LaLiga",
         estado: "Terminado",
-        fecha: new Date(Date.now() - 7200000),
+        fecha: new Date(Date.now() - 43200000),
         minuto: 90,
-        estadio: "Allianz Arena",
-        asistencia: 75000,
+        estadio: "Santiago Bernabéu",
+        asistencia: 81000,
         goles: [
-          { tiempo: "8'", jugador: "Gnabry", equipo: "local" },
-          { tiempo: "19'", jugador: "Sané", equipo: "local" },
-          { tiempo: "31'", jugador: "Bellingham", equipo: "visitante" },
-          { tiempo: "56'", jugador: "Müller", equipo: "local" },
-          { tiempo: "78'", jugador: "Serge Gnabry", equipo: "local" }
+          { tiempo: "18'", jugador: "Bellingham", equipo: "local" },
+          { tiempo: "42'", jugador: "Lewandowski", equipo: "visitante" },
+          { tiempo: "55'", jugador: "Vinicius Jr", equipo: "local" },
+          { tiempo: "66'", jugador: "Pedri", equipo: "visitante" },
+          { tiempo: "80'", jugador: "Rodrygo", equipo: "local" }
         ]
       },
       {
@@ -705,7 +705,7 @@
         golesVisitante: 0,
         liga: "Ligue 1",
         estado: "Terminado",
-        fecha: new Date(Date.now() - 10800000),
+        fecha: new Date(Date.now() - 172800000),
         minuto: 90,
         estadio: "Parc des Princes",
         asistencia: 47000,
@@ -716,19 +716,22 @@
       },
       {
         id: 6,
-        local: "Inter",
-        visitante: "AC Milan",
-        golesLocal: 1,
+        local: "Bayern Munich",
+        visitante: "Borussia Dortmund",
+        golesLocal: 4,
         golesVisitante: 1,
-        liga: "Serie A",
+        liga: "Bundesliga",
         estado: "Terminado",
-        fecha: new Date(Date.now() - 14400000),
+        fecha: new Date(Date.now() - 259200000),
         minuto: 90,
-        estadio: "San Siro",
-        asistencia: 78000,
+        estadio: "Allianz Arena",
+        asistencia: 75000,
         goles: [
-          { tiempo: "34'", jugador: "Lautaro", equipo: "local" },
-          { tiempo: "87'", jugador: "Leão", equipo: "visitante" }
+          { tiempo: "8'", jugador: "Gnabry", equipo: "local" },
+          { tiempo: "19'", jugador: "Sané", equipo: "local" },
+          { tiempo: "31'", jugador: "Bellingham", equipo: "visitante" },
+          { tiempo: "56'", jugador: "Müller", equipo: "local" },
+          { tiempo: "78'", jugador: "Kimmich", equipo: "local" }
         ]
       },
       {
@@ -747,7 +750,7 @@
       },
       {
         id: 8,
-        local: "Manchester United",
+        local: "Arsenal",
         visitante: "Chelsea",
         golesLocal: 0,
         golesVisitante: 0,
@@ -755,7 +758,7 @@
         estado: "Próximo",
         fecha: new Date(Date.now() + 172800000),
         minuto: 0,
-        estadio: "Old Trafford",
+        estadio: "Emirates Stadium",
         asistencia: 0,
         goles: []
       }
@@ -773,15 +776,15 @@
     function getVisibleMatches(){
       let filtered = matches;
 
-      if (filtroEstado !== "Todos"){
+      if (filtroEstado !== "Todos") {
         filtered = filtered.filter(m => m.estado === filtroEstado);
       }
 
-      if (filtroLiga){
+      if (filtroLiga) {
         filtered = filtered.filter(m => m.liga === filtroLiga);
       }
 
-      if (searchTerm.trim()){
+      if (searchTerm.trim()) {
         const q = searchTerm.trim().toLowerCase();
         filtered = filtered.filter(m =>
           m.local.toLowerCase().includes(q) ||
@@ -806,14 +809,10 @@
       }
     }
 
-    function getStatusLabel(estado){
-      if (estado === "En vivo") return `EN VIVO · ${getRandomMinute()}`;
-      if (estado === "Terminado") return "TERMINADO";
+    function getStatusLabel(estado, minuto){
+      if (estado === "En vivo") return `EN VIVO · ${minuto}'`;
+      if (estado === "Terminado") return "RESULTADO FINAL";
       return "PRÓXIMO";
-    }
-
-    function getRandomMinute(){
-      return Math.floor(Math.random() * 90) + "'";
     }
 
     function render(){
@@ -836,55 +835,55 @@
         return;
       }
 
-      lista.innerHTML = visible.map(m => `
-        <div class="match-card">
-          <div class="match-header">
-            <div class="league">⚽ ${esc(m.liga)}</div>
-            <div class="match-status ${getStatusClass(m.estado)}">
-              ${getStatusLabel(m.estado)}
-            </div>
-          </div>
+      lista.innerHTML = visible.map(m => {
+        const mostrarHora = m.estado === "En vivo" ? ` <strong style="color:var(--red)">${m.minuto}'</strong>` :
+          (m.estado === "Próximo" ? formatFecha(m.fecha) : "Resultado final");
 
-          <div class="match-content">
-            <div class="team">
-              <div class="team-name">${esc(m.local)}</div>
-              <div class="team-info">${m.estado === "Próximo" ? formatFecha(m.fecha) : esc(m.estadio)}</div>
-            </div>
-
-            <div class="score-box">
-              <div class="score">
-                <div class="score-value">${m.golesLocal}</div>
-                <div class="score-divider">-</div>
-                <div class="score-value">${m.golesVisitante}</div>
-              </div>
-              <div class="match-time">
-                ${m.estado === "En vivo" 
-                  ? `<strong style="color:var(--red)">${m.minuto}'</strong>` 
-                  : `${formatFecha(m.fecha)}`
-                }
+        return `
+          <div class="match-card">
+            <div class="match-header">
+              <div class="league">⚽ ${esc(m.liga)}</div>
+              <div class="match-status ${getStatusClass(m.estado)}">
+                ${getStatusLabel(m.estado, m.minuto)}
               </div>
             </div>
 
-            <div class="team">
-              <div class="team-name">${esc(m.visitante)}</div>
-              <div class="team-info">${m.asistencia > 0 ? m.asistencia.toLocaleString() + " 👥" : "Pendiente"}</div>
+            <div class="match-content">
+              <div class="team">
+                <div class="team-name">${esc(m.local)}</div>
+                <div class="team-info">${m.estado === "Próximo" ? formatFecha(m.fecha) : esc(m.estadio)}</div>
+              </div>
+
+              <div class="score-box">
+                <div class="score">
+                  <div class="score-value">${m.golesLocal}</div>
+                  <div class="score-divider">-</div>
+                  <div class="score-value">${m.golesVisitante}</div>
+                </div>
+                <div class="match-time">${mostrarHora}</div>
+              </div>
+
+              <div class="team">
+                <div class="team-name">${esc(m.visitante)}</div>
+                <div class="team-info">${m.asistencia > 0 ? m.asistencia.toLocaleString() + " 👥" : "Pendiente"}</div>
+              </div>
+            </div>
+
+            <div class="match-details">
+              <div class="stats">
+                ${m.goles.length > 0 ? `<div class="stat-item">⚽ ${m.goles.length} goles</div>` : ""}
+                ${m.estado !== "Próximo" ? `<div class="stat-item">📺 ${m.estado}</div>` : ""}
+              </div>
+
+              <div class="match-actions">
+                <button class="icon-btn" title="Ver detalles">👁️</button>
+                <button class="icon-btn" onclick="crearDebate('${m.local} vs ${m.visitante}')" title="Comentar">💬</button>
+                <button class="icon-btn" title="Guardar">❤️</button>
+              </div>
             </div>
           </div>
-
-          <div class="match-details">
-            <div class="stats">
-              ${m.goles.length > 0 ? `<div class="stat-item">⚽ ${m.goles.length} goles</div>` : ""}
-              ${m.estado !== "Próximo" ? `<div class="stat-item">📺 ${m.estado}</div>` : ""}
-            </div>
-
-            <div class="match-actions">
-              <button class="icon-btn" title="Ver detalles">👁️</button>
-              <button class="icon-btn" onclick="crearDebate('${m.local} vs ${m.visitante}')" title="Comentar">💬</button>
-              <button class="icon-btn" title="Guardar">❤️</button>
-            </div>
-          </div>
-        </div>
-      `).join("");
+        `;
+      }).join("");
     }
 
     function formatFecha(fecha){
@@ -905,10 +904,10 @@
       return d.toLocaleDateString("es-ES") + " " + d.toLocaleTimeString("es-ES", opciones);
     }
 
-    function filtrarPorEstado(estado){
+    function filtrarPorEstado(estado, el){
       filtroEstado = estado;
       document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
-      event.target.classList.add("active");
+      if (el) el.classList.add("active");
       render();
     }
 
