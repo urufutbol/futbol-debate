@@ -561,6 +561,7 @@
       <nav class="nav-links">
         <a href="futbol_debate_Version3.html">Debates</a>
         <a href="#" class="active">Resultados</a>
+        <button class="btn secondary" type="button" onclick="descargarHTML()">📥 Descargar</button>
       </nav>
     </div>
   </header>
@@ -889,7 +890,7 @@
 
             <div class="match-actions">
               <button class="icon-btn" title="Ver detalles">👁️</button>
-              <button class="icon-btn" onclick="crearDebate('${m.local} vs ${m.visitante}')" title="Comentar">💬</button>
+              <button class="icon-btn" onclick="crearDebate('${m.local} vs ${m.visitante}')}" title="Comentar">💬</button>
               <button class="icon-btn" title="Guardar">❤️</button>
             </div>
           </div>
@@ -906,37 +907,24 @@
       const futureMatches = visible.filter(m => m.estado === "Próximo");
 
       const today = visible.filter(m => new Date(m.fecha).toDateString() === new Date().toDateString());
-      const live = liveMatches;
       const goals = visible.reduce((sum, m) => sum + m.golesLocal + m.golesVisitante, 0);
 
       document.getElementById("todayCount").textContent = today.length;
-      document.getElementById("liveCount").textContent = live.length;
+      document.getElementById("liveCount").textContent = liveMatches.length;
       document.getElementById("totalGoals").textContent = goals;
 
       const groups = [];
 
       if (filtroEstado === "Todos" || filtroEstado === "En vivo") {
-        groups.push({
-          key: "live",
-          title: "En vivo",
-          items: liveMatches
-        });
+        groups.push({ key: "live", title: "En vivo", items: liveMatches });
       }
 
       if (filtroEstado === "Todos" || filtroEstado === "Terminado") {
-        groups.push({
-          key: "finished",
-          title: "Ya pasaron",
-          items: finishedMatches
-        });
+        groups.push({ key: "finished", title: "Ya pasaron", items: finishedMatches });
       }
 
       if (filtroEstado === "Todos" || filtroEstado === "Próximo") {
-        groups.push({
-          key: "future",
-          title: "Próximos",
-          items: futureMatches
-        });
+        groups.push({ key: "future", title: "Próximos", items: futureMatches });
       }
 
       const hasContent = groups.some(group => group.items.length > 0);
@@ -1006,12 +994,25 @@
       }[c]));
     }
 
-    document.getElementById("searchInput").addEventListener("input", (e) => {
+    function descargarHTML(){
+      const html = document.documentElement.outerHTML;
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "futbol_debate_resultados.html";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("searchInput").addEventListener("input", e => {
       searchTerm = e.target.value;
       render();
     });
 
-    document.getElementById("leagueFilter").addEventListener("change", (e) => {
+    document.getElementById("leagueFilter").addEventListener("change", e => {
       filtroLiga = e.target.value;
       render();
     });
