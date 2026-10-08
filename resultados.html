@@ -212,8 +212,40 @@
     .matches-list{
       display:flex;
       flex-direction:column;
+      gap:22px;
+    }
+
+    .section-group{
+      display:flex;
+      flex-direction:column;
       gap:18px;
     }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      font-size:15px;
+      font-weight:800;
+      color:var(--text);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:0 3px;
+    }
+
+    .section-title .dot-title{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      margin-right:8px;
+    }
+
+    .live .dot-title{ background:var(--red); box-shadow:0 0 12px rgba(255,107,107,.7); }
+    .finished .dot-title{ background:var(--green); box-shadow:0 0 12px rgba(57,217,138,.7); }
 
     .match-card{
       background:rgba(15,24,31,.85);
@@ -536,7 +568,7 @@
   <section class="hero">
     <div class="container">
       <h1>Resultados en <span>vivo</span></h1>
-      <p>Seguí los partidos actuales y consultá el resultado final de los que ya terminaron</p>
+      <p>Los partidos en directo y los resultados ya disputados, separados para que sea más fácil seguirlos.</p>
     </div>
   </section>
 
@@ -815,72 +847,115 @@
       return "PRÓXIMO";
     }
 
+    function makeMatchCard(m){
+      const mostrarHora = m.estado === "En vivo" ? ` <strong style="color:var(--red)">${m.minuto}'</strong>` :
+        (m.estado === "Próximo" ? formatFecha(m.fecha) : "Resultado final");
+
+      return `
+        <div class="match-card">
+          <div class="match-header">
+            <div class="league">⚽ ${esc(m.liga)}</div>
+            <div class="match-status ${getStatusClass(m.estado)}">
+              ${getStatusLabel(m.estado, m.minuto)}
+            </div>
+          </div>
+
+          <div class="match-content">
+            <div class="team">
+              <div class="team-name">${esc(m.local)}</div>
+              <div class="team-info">${m.estado === "Próximo" ? formatFecha(m.fecha) : esc(m.estadio)}</div>
+            </div>
+
+            <div class="score-box">
+              <div class="score">
+                <div class="score-value">${m.golesLocal}</div>
+                <div class="score-divider">-</div>
+                <div class="score-value">${m.golesVisitante}</div>
+              </div>
+              <div class="match-time">${mostrarHora}</div>
+            </div>
+
+            <div class="team">
+              <div class="team-name">${esc(m.visitante)}</div>
+              <div class="team-info">${m.asistencia > 0 ? m.asistencia.toLocaleString() + " 👥" : "Pendiente"}</div>
+            </div>
+          </div>
+
+          <div class="match-details">
+            <div class="stats">
+              ${m.goles.length > 0 ? `<div class="stat-item">⚽ ${m.goles.length} goles</div>` : ""}
+              ${m.estado !== "Próximo" ? `<div class="stat-item">📺 ${m.estado}</div>` : ""}
+            </div>
+
+            <div class="match-actions">
+              <button class="icon-btn" title="Ver detalles">👁️</button>
+              <button class="icon-btn" onclick="crearDebate('${m.local} vs ${m.visitante}')" title="Comentar">💬</button>
+              <button class="icon-btn" title="Guardar">❤️</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function render(){
       const lista = document.getElementById("matchesList");
       const visible = getVisibleMatches();
 
-      const today = visible.filter(m =>
-        new Date(m.fecha).toDateString() === new Date().toDateString()
-      );
+      const liveMatches = visible.filter(m => m.estado === "En vivo");
+      const finishedMatches = visible.filter(m => m.estado === "Terminado");
+      const futureMatches = visible.filter(m => m.estado === "Próximo");
 
-      const live = visible.filter(m => m.estado === "En vivo");
+      const today = visible.filter(m => new Date(m.fecha).toDateString() === new Date().toDateString());
+      const live = liveMatches;
       const goals = visible.reduce((sum, m) => sum + m.golesLocal + m.golesVisitante, 0);
 
       document.getElementById("todayCount").textContent = today.length;
       document.getElementById("liveCount").textContent = live.length;
       document.getElementById("totalGoals").textContent = goals;
 
-      if (!visible.length){
+      const groups = [];
+
+      if (filtroEstado === "Todos" || filtroEstado === "En vivo") {
+        groups.push({
+          key: "live",
+          title: "En vivo",
+          items: liveMatches
+        });
+      }
+
+      if (filtroEstado === "Todos" || filtroEstado === "Terminado") {
+        groups.push({
+          key: "finished",
+          title: "Ya pasaron",
+          items: finishedMatches
+        });
+      }
+
+      if (filtroEstado === "Todos" || filtroEstado === "Próximo") {
+        groups.push({
+          key: "future",
+          title: "Próximos",
+          items: futureMatches
+        });
+      }
+
+      const hasContent = groups.some(group => group.items.length > 0);
+
+      if (!hasContent) {
         lista.innerHTML = '<div class="empty">No hay partidos que coincidan con tu búsqueda. Probá con otros filtros.</div>';
         return;
       }
 
-      lista.innerHTML = visible.map(m => {
-        const mostrarHora = m.estado === "En vivo" ? ` <strong style="color:var(--red)">${m.minuto}'</strong>` :
-          (m.estado === "Próximo" ? formatFecha(m.fecha) : "Resultado final");
+      lista.innerHTML = groups.map(group => {
+        if (!group.items.length) return "";
 
         return `
-          <div class="match-card">
-            <div class="match-header">
-              <div class="league">⚽ ${esc(m.liga)}</div>
-              <div class="match-status ${getStatusClass(m.estado)}">
-                ${getStatusLabel(m.estado, m.minuto)}
-              </div>
+          <div class="section-group ${group.key === 'live' ? 'live' : 'finished'}">
+            <div class="section-title">
+              <span><span class="dot-title"></span>${group.title}</span>
+              <span>${group.items.length}</span>
             </div>
-
-            <div class="match-content">
-              <div class="team">
-                <div class="team-name">${esc(m.local)}</div>
-                <div class="team-info">${m.estado === "Próximo" ? formatFecha(m.fecha) : esc(m.estadio)}</div>
-              </div>
-
-              <div class="score-box">
-                <div class="score">
-                  <div class="score-value">${m.golesLocal}</div>
-                  <div class="score-divider">-</div>
-                  <div class="score-value">${m.golesVisitante}</div>
-                </div>
-                <div class="match-time">${mostrarHora}</div>
-              </div>
-
-              <div class="team">
-                <div class="team-name">${esc(m.visitante)}</div>
-                <div class="team-info">${m.asistencia > 0 ? m.asistencia.toLocaleString() + " 👥" : "Pendiente"}</div>
-              </div>
-            </div>
-
-            <div class="match-details">
-              <div class="stats">
-                ${m.goles.length > 0 ? `<div class="stat-item">⚽ ${m.goles.length} goles</div>` : ""}
-                ${m.estado !== "Próximo" ? `<div class="stat-item">📺 ${m.estado}</div>` : ""}
-              </div>
-
-              <div class="match-actions">
-                <button class="icon-btn" title="Ver detalles">👁️</button>
-                <button class="icon-btn" onclick="crearDebate('${m.local} vs ${m.visitante}')" title="Comentar">💬</button>
-                <button class="icon-btn" title="Guardar">❤️</button>
-              </div>
-            </div>
+            ${group.items.map(makeMatchCard).join("")}
           </div>
         `;
       }).join("");
